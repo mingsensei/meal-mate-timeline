@@ -208,6 +208,7 @@ export function TimelineView({ date, bookings, onBookingClick }: TimelineViewPro
               return (
                 <div
                   key={table.id}
+                  data-row
                   className="relative flex border-b border-border"
                   style={{ height: rowHeight }}
                 >
