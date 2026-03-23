@@ -240,11 +240,12 @@ export function TimelineView({ date, bookings, onBookingClick }: TimelineViewPro
 
                   <div className="relative flex">
                     {TIME_SLOTS.map((slot) => (
-                      <div
-                        key={slot}
-                        className={`flex-shrink-0 border-r ${slot.endsWith(":00") ? "border-border" : "border-timeline-grid"}`}
-                        style={{ width: SLOT_W, height: rowHeight }}
-                      />
+                    <div
+                      key={slot}
+                      data-grid-cell
+                      className={`flex-shrink-0 border-r ${slot.endsWith(":00") ? "border-border" : "border-timeline-grid"}`}
+                      style={{ width: SLOT_W, height: rowHeight }}
+                    />
                     ))}
 
                     {tableBookings.map((booking) => {
