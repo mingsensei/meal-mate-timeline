@@ -67,7 +67,7 @@ export function BookingModal({ open, onClose, onSave, onDelete, booking, date }:
     const endTime = form.end_time || addHours(form.start_time, 2);
     const data = { ...form, end_time: endTime, date };
     const result = onSave(data);
-    if (result?.conflict) {
+    if (result && 'conflict' in result && result.conflict) {
       setWarning(true);
     }
     onClose();
