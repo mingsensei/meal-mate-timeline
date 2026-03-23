@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useNavigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
@@ -11,7 +13,11 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const ok = login(email, password);
-    if (!ok) setError(true);
+    if (ok) {
+      navigate("/");
+    } else {
+      setError(true);
+    }
   };
 
   return (
