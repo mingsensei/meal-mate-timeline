@@ -271,6 +271,7 @@ export function TimelineView({ date, bookings, onBookingClick }: TimelineViewPro
 
             {showNowLine && (
               <div
+                data-now-line
                 className="pointer-events-none absolute top-0 bottom-0 z-10 w-0.5 bg-destructive"
                 style={{ left: TABLE_COL_WIDTH + nowLeft }}
               />
