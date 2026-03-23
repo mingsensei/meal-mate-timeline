@@ -56,11 +56,11 @@ export function BookingModal({ open, onClose, onSave, onDelete, booking, date }:
     setWarning(false);
   }, [booking, open]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.customer_name.trim() || form.table_ids.length === 0) return;
     const endTime = form.end_time || addHours(form.start_time, 2);
     const data = { ...form, end_time: endTime, date };
-    const result = onSave(data);
+    const result = await onSave(data);
     if (result && 'conflict' in result && result.conflict) {
       setWarning(true);
     }
