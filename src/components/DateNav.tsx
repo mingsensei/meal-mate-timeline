@@ -39,27 +39,30 @@ export function DateNav({ date, onDateChange, view, onViewChange, children }: Da
         </Button>
       </div>
 
-      <div className="flex rounded-lg bg-muted p-0.5">
-        <button
-          onClick={() => onViewChange("calendar")}
-          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-            view === "calendar"
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground"
-          }`}
-        >
-          Calendar
-        </button>
-        <button
-          onClick={() => onViewChange("timeline")}
-          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-            view === "timeline"
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground"
-          }`}
-        >
-          Timeline
-        </button>
+      <div className="flex items-center gap-2">
+        <div className="flex rounded-lg bg-muted p-0.5">
+          <button
+            onClick={() => onViewChange("calendar")}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              view === "calendar"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground"
+            }`}
+          >
+            Calendar
+          </button>
+          <button
+            onClick={() => onViewChange("timeline")}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+              view === "timeline"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground"
+            }`}
+          >
+            Timeline
+          </button>
+        </div>
+        {children}
       </div>
     </div>
   );
