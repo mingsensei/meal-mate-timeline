@@ -59,6 +59,8 @@ function BookingBlock({
   return (
     <button
       onClick={onClick}
+      data-block
+      data-span={isFirst ? spanCount : undefined}
       className={`absolute rounded-md px-1.5 py-0.5 text-left shadow-sm transition-transform active:scale-[0.98] overflow-hidden ${statusClasses[booking.status]} ${!isFirst ? "pointer-events-none opacity-0" : ""}`}
       style={{
         left,
@@ -114,22 +116,51 @@ export function TimelineView({ date, bookings, onBookingClick }: TimelineViewPro
     if (!timelineRef.current) return;
     setExporting(true);
     try {
+      // Clone the timeline into an offscreen container for clean capture
       const el = timelineRef.current;
-      // Temporarily expand to full content width for capture
-      const prevOverflow = el.style.overflow;
-      el.style.overflow = "visible";
-      await new Promise((r) => setTimeout(r, 100));
+      const clone = el.cloneNode(true) as HTMLElement;
+      clone.style.position = "absolute";
+      clone.style.left = "-9999px";
+      clone.style.top = "0";
+      clone.style.width = `${TABLE_COL_WIDTH + totalWidth}px`;
+      clone.style.height = "auto";
+      clone.style.overflow = "visible";
+      clone.style.background = "#ffffff";
 
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        backgroundColor: null,
-        useCORS: true,
-        width: TABLE_COL_WIDTH + totalWidth,
-        scrollX: 0,
-        scrollY: 0,
+      // Reset all rows to fixed height for export
+      const rows = clone.querySelectorAll<HTMLElement>("[data-row]");
+      rows.forEach((row) => {
+        row.style.height = "56px";
+      });
+      const blocks = clone.querySelectorAll<HTMLElement>("[data-block]");
+      blocks.forEach((block) => {
+        block.style.height = "52px";
+      });
+      const spanBlocks = clone.querySelectorAll<HTMLElement>("[data-span]");
+      spanBlocks.forEach((block) => {
+        const span = parseInt(block.getAttribute("data-span") || "1");
+        block.style.height = `${span * 56 - 4}px`;
       });
 
-      el.style.overflow = prevOverflow;
+      // Remove sticky positioning for clean render
+      const stickyEls = clone.querySelectorAll<HTMLElement>(".sticky");
+      stickyEls.forEach((s) => {
+        s.style.position = "relative";
+        s.style.left = "0";
+        s.style.top = "0";
+      });
+
+      document.body.appendChild(clone);
+      await new Promise((r) => setTimeout(r, 200));
+
+      const canvas = await html2canvas(clone, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        width: TABLE_COL_WIDTH + totalWidth,
+      });
+
+      document.body.removeChild(clone);
 
       const link = document.createElement("a");
       link.download = `timeline-${format(date, "yyyy-MM-dd")}.png`;
@@ -177,6 +208,7 @@ export function TimelineView({ date, bookings, onBookingClick }: TimelineViewPro
               return (
                 <div
                   key={table.id}
+                  data-row
                   className="relative flex border-b border-border"
                   style={{ height: rowHeight }}
                 >
