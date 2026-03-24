@@ -69,7 +69,7 @@ const Index = () => {
         )}
       </DateNav>
 
-      <TimelineView date={date} bookings={dayBookings} onBookingClick={handleBookingClick} />
+      <TimelineView date={date} bookings={dayBookings} onBookingClick={handleBookingClick} loading={loading} />
 
       {view === "calendar" && (
         <CalendarView

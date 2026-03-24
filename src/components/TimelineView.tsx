@@ -210,7 +210,12 @@ export function TimelineView({ date, bookings, onBookingClick, loading }: Timeli
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="relative flex flex-col">
+      {loading && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
       <div className="overflow-hidden" style={{ height: "60dvh" }}>
         <div ref={scrollRef} className="h-full overflow-x-auto overflow-y-hidden">
           <div ref={timelineRef} className="relative" style={{ minWidth: TABLE_COL_WIDTH + totalWidth }}>
