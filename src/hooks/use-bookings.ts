@@ -103,9 +103,10 @@ export function useBookings() {
       }
 
       toast.success("Booking updated");
+      await fetchBookings();
       return { conflict };
     },
-    [bookings]
+    [bookings, fetchBookings]
   );
 
   const deleteBooking = useCallback(async (id: string) => {
