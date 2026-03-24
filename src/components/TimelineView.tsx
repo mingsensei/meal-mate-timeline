@@ -32,6 +32,7 @@ interface TimelineViewProps {
   date: Date;
   bookings: Booking[];
   onBookingClick: (booking: Booking) => void;
+  loading?: boolean;
 }
 
 function BookingBlock({
