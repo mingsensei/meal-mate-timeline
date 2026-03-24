@@ -67,9 +67,10 @@ export function useBookings() {
       }
 
       toast.success(conflict ? "Booking created with conflict" : "Booking created");
+      await fetchBookings();
       return { conflict };
     },
-    [bookings]
+    [bookings, fetchBookings]
   );
 
   const updateBooking = useCallback(
