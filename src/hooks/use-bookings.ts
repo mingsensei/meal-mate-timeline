@@ -8,15 +8,15 @@ export function useBookings() {
   const [loading, setLoading] = useState(true);
 
   const fetchBookings = useCallback(async () => {
+    setLoading(true);
     const { data, error } = await supabase.from("bookings").select("*");
     if (error) {
       console.error("Failed to fetch bookings:", error);
       toast.error("Failed to load bookings");
-      return;
-    }
-    if (data) {
+    } else if (data) {
       setBookings(data as Booking[]);
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
