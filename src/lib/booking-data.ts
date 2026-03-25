@@ -17,10 +17,8 @@ export interface Table {
   capacity: number;
 }
 
-export const TABLES: Table[] = Array.from({ length: 10 }, (_, i) => ({
-  id: `T${i + 1}`,
-  capacity: 2,
-}));
+// Default tables removed — now fetched from database via useLocations hook
+export const TABLES: Table[] = [];
 
 export const TIME_SLOTS: string[] = [];
 for (let h = 17; h <= 22; h++) {
