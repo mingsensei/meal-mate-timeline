@@ -263,7 +263,7 @@ export function TimelineView({ date, bookings, tables, onBookingClick, loading }
                       style={{ width: SLOT_W }}
                     >
                       {label && (
-                        <span className="absolute text-[11px] font-bold" style={{ left: -1, top: '50%', transform: 'translateY(-50%)' }}>
+                        <span className="absolute text-[11px] font-bold z-10" style={{ left: 0, top: '50%', transform: 'translate(-50%, -50%)' }}>
                           {label}
                         </span>
                       )}
