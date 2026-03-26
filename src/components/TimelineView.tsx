@@ -25,18 +25,29 @@ function localGetWidth(startTime: string, endTime: string): number {
   return ((endMins - startMins) / 30) * SLOT_W;
 }
 
-function isBookingPastOrInProgress(booking: Booking, date: Date): boolean {
-  const now = new Date();
+function getBookingTimeStatus(booking: Booking, date: Date, now: Date): "past" | "active" | "future" {
   const isToday = format(now, "yyyy-MM-dd") === format(date, "yyyy-MM-dd");
   if (!isToday) {
-    // If the booking date is in the past
     const bookingDate = new Date(booking.date + "T00:00:00");
-    return bookingDate < new Date(format(now, "yyyy-MM-dd") + "T00:00:00");
+    return bookingDate < new Date(format(now, "yyyy-MM-dd") + "T00:00:00") ? "past" : "future";
   }
-  // If today, check if booking end time has passed or is currently in progress
   const nowMins = now.getHours() * 60 + now.getMinutes();
   const startMins = timeToMinutes(booking.start_time);
-  return nowMins >= startMins;
+  const endMins = timeToMinutes(booking.end_time);
+  if (nowMins >= startMins && nowMins < endMins) return "active";
+  if (nowMins >= endMins) return "past";
+  return "future";
+}
+
+function formatTimeLabel(slot: string): string {
+  const [hStr, mStr] = slot.split(":");
+  let h = parseInt(hStr);
+  const m = parseInt(mStr);
+  const suffix = h >= 12 ? "pm" : "am";
+  if (h > 12) h -= 12;
+  if (h === 0) h = 12;
+  if (m === 0) return `${h}${suffix}`;
+  return `${h}:${mStr}${suffix}`;
 }
 
 interface TimelineViewProps {
@@ -60,7 +71,7 @@ function BookingBlock({
   isFirst: boolean;
   spanCount: number;
   rowHeight: string;
-  isPast: boolean;
+  timeStatus: "past" | "active" | "future";
 }) {
   const left = localGetLeft(booking.start_time);
   const width = localGetWidth(booking.start_time, booking.end_time);
@@ -71,7 +82,7 @@ function BookingBlock({
     conflict: "bg-booking-conflict text-booking-conflict-foreground",
   };
 
-  const colorClass = isPast
+  const colorClass = timeStatus === "active" || timeStatus === "past"
     ? "bg-booking-past text-booking-past-foreground"
     : statusClasses[booking.status];
 
@@ -80,7 +91,7 @@ function BookingBlock({
       onClick={onClick}
       data-block
       data-span={isFirst ? spanCount : undefined}
-      className={`absolute rounded-md px-1.5 py-0.5 text-left shadow-sm transition-transform active:scale-[0.98] overflow-hidden ${colorClass} ${!isFirst ? "pointer-events-none opacity-0" : ""}`}
+      className={`absolute rounded-md px-1.5 py-0.5 text-left shadow-sm transition-colors duration-500 active:scale-[0.98] overflow-hidden ${colorClass} ${!isFirst ? "pointer-events-none opacity-0" : ""}`}
       style={{
         left,
         width: Math.max(width, SLOT_W),
