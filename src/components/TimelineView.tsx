@@ -64,7 +64,7 @@ function BookingBlock({
   isFirst,
   spanCount,
   rowHeight,
-  isPast,
+  timeStatus,
 }: {
   booking: Booking;
   onClick: () => void;
@@ -123,14 +123,20 @@ export function TimelineView({ date, bookings, tables, onBookingClick, loading }
   const scrollRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const totalWidth = TIME_SLOTS.length * SLOT_W;
+
+  // Update current time every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const tableCount = tables.length || 1;
   const rowHeight = `calc((60dvh - ${HEADER_HEIGHT}px) / ${tableCount})`;
 
-  const now = new Date();
-  const isToday = format(now, "yyyy-MM-dd") === format(date, "yyyy-MM-dd");
-  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const isToday = format(currentTime, "yyyy-MM-dd") === format(date, "yyyy-MM-dd");
+  const nowMins = currentTime.getHours() * 60 + currentTime.getMinutes();
   const showNowLine = isToday && nowMins >= timeToMinutes("17:00") && nowMins <= timeToMinutes("22:00");
   const nowLeft = showNowLine
     ? ((nowMins - timeToMinutes("17:00")) / 30) * SLOT_W
@@ -224,7 +230,7 @@ export function TimelineView({ date, bookings, tables, onBookingClick, loading }
   };
 
   const getSlotLabel = (slot: string) => {
-    return slot.endsWith(":00") ? slot : "";
+    return slot.endsWith(":00") ? formatTimeLabel(slot) : "";
   };
 
   return (
@@ -249,10 +255,10 @@ export function TimelineView({ date, bookings, tables, onBookingClick, loading }
                   return (
                     <div
                       key={slot}
-                      className={`flex-shrink-0 border-r border-border flex items-center justify-center text-muted-foreground ${
-                        isFullHour ? "text-[11px] font-bold" : "text-[9px] font-medium"
+                      className={`flex-shrink-0 border-r flex items-center text-muted-foreground ${
+                        isFullHour ? "text-[11px] font-bold border-foreground/20" : "text-[9px] font-medium border-timeline-grid"
                       }`}
-                      style={{ width: SLOT_W }}
+                      style={{ width: SLOT_W, paddingLeft: 2 }}
                     >
                       {getSlotLabel(slot)}
                     </div>
@@ -284,7 +290,7 @@ export function TimelineView({ date, bookings, tables, onBookingClick, loading }
                       <div
                         key={slot}
                         data-grid-cell
-                        className={`flex-shrink-0 border-r ${slot.endsWith(":00") ? "border-border" : "border-timeline-grid"}`}
+                        className={`flex-shrink-0 border-r ${slot.endsWith(":00") ? "border-foreground/20" : "border-timeline-grid"}`}
                         style={{ width: SLOT_W, height: rowHeight }}
                       />
                     ))}
@@ -294,7 +300,7 @@ export function TimelineView({ date, bookings, tables, onBookingClick, loading }
                       const firstTable = sortedTables[0];
                       const isFirst = table.id === firstTable;
                       const spanCount = sortedTables.length;
-                      const isPast = isBookingPastOrInProgress(booking, date);
+                      const timeStatus = getBookingTimeStatus(booking, date, currentTime);
 
                       return (
                         <BookingBlock
@@ -304,7 +310,7 @@ export function TimelineView({ date, bookings, tables, onBookingClick, loading }
                           isFirst={isFirst}
                           spanCount={spanCount}
                           rowHeight={rowHeight}
-                          isPast={isPast}
+                          timeStatus={timeStatus}
                         />
                       );
                     })}
