@@ -28,7 +28,8 @@ const Index = () => {
     useBookings();
 
   const dateStr = format(date, "yyyy-MM-dd");
-  const dayBookings = getBookingsForDate(dateStr).filter(
+  const allDayBookings = getBookingsForDate(dateStr);
+  const dayBookings = allDayBookings.filter(
     (b) => !selectedLocationId || b.location_id === selectedLocationId
   );
 
@@ -109,13 +110,13 @@ const Index = () => {
       />
 
       {/* Reservation list below timeline */}
-      <div className="flex-1 min-h-0 border-t border-border overflow-y-auto bg-card">
+      <div className="flex-1 min-h-0 border-t border-border overflow-y-auto bg-background">
         <div className="sticky top-0 z-10 bg-card border-b border-border px-4 py-2">
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            Reservations ({dayBookings.length})
+            All Reservations ({allDayBookings.length})
           </h2>
         </div>
-        <ReservationList bookings={dayBookings} onBookingClick={handleBookingClick} />
+        <ReservationList bookings={allDayBookings} onBookingClick={handleBookingClick} />
       </div>
 
       {view === "calendar" && (
