@@ -360,4 +360,4 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
 
     </div>
   );
-}
+});
