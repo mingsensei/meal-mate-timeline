@@ -1,12 +1,15 @@
+import { RefreshCw } from "lucide-react";
 import { Location } from "@/hooks/use-locations";
 
 interface LocationSwitcherProps {
   locations: Location[];
   selectedId: string | null;
   onChange: (id: string) => void;
+  onReload?: () => void;
+  reloading?: boolean;
 }
 
-export function LocationSwitcher({ locations, selectedId, onChange }: LocationSwitcherProps) {
+export function LocationSwitcher({ locations, selectedId, onChange, onReload, reloading }: LocationSwitcherProps) {
   if (locations.length === 0) return null;
 
   return (
@@ -24,6 +27,16 @@ export function LocationSwitcher({ locations, selectedId, onChange }: LocationSw
           {loc.name}
         </button>
       ))}
+      {onReload && (
+        <button
+          onClick={onReload}
+          disabled={reloading}
+          className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-accent transition-colors disabled:opacity-50"
+          title="Reload bookings"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${reloading ? "animate-spin" : ""}`} />
+        </button>
+      )}
     </div>
   );
 }
