@@ -120,7 +120,7 @@ function BookingBlock({
               {booking.note}
             </div>
           )}
-          <div className="truncate text-[10px] font-semibold leading-tight pr-3">{booking.customer_name}</div>
+          <div className="truncate text-[10px] font-semibold leading-tight">{booking.customer_name}</div>
           <div className="truncate text-[8px] opacity-90">
             {booking.number_of_people}p · {booking.start_time}–{booking.end_time}
           </div>
