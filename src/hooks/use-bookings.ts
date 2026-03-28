@@ -122,5 +122,5 @@ export function useBookings() {
     await fetchBookings();
   }, [fetchBookings]);
 
-  return { bookings, loading, getBookingsForDate, getDatesWithBookings, addBooking, updateBooking, deleteBooking };
+  return { bookings, loading, getBookingsForDate, getDatesWithBookings, addBooking, updateBooking, deleteBooking, refetch: fetchBookings };
 }

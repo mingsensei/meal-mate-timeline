@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { format } from "date-fns";
 import { Plus, LogIn, LogOut, Download, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -21,10 +21,11 @@ const Index = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [reloading, setReloading] = useState(false);
   const timelineRef = useRef<TimelineViewHandle>(null);
 
   const { locations, tables, selectedLocationId, setSelectedLocationId } = useLocations();
-  const { loading, getBookingsForDate, getDatesWithBookings, addBooking, updateBooking, deleteBooking } =
+  const { loading, getBookingsForDate, getDatesWithBookings, addBooking, updateBooking, deleteBooking, refetch } =
     useBookings();
 
   const dateStr = format(date, "yyyy-MM-dd");
@@ -64,13 +65,19 @@ const Index = () => {
     }
   };
 
+  const handleReload = useCallback(async () => {
+    setReloading(true);
+    await refetch();
+    setReloading(false);
+  }, [refetch]);
+
   return (
     <div className="flex h-dvh flex-col bg-background pt-[env(safe-area-inset-top)]">
       <DateNav date={date} onDateChange={setDate} view={view} onViewChange={setView}>
         <button
           onClick={handleExport}
           disabled={exporting}
-          className="flex items-center gap-1 rounded-lg border border-border bg-muted px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent transition-colors disabled:opacity-60"
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground hover:bg-accent transition-colors disabled:opacity-60"
           title="Export Timeline as PNG"
         >
           {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
@@ -78,18 +85,18 @@ const Index = () => {
         {isLoggedIn ? (
           <button
             onClick={logout}
-            className="flex items-center gap-1 rounded-lg border border-border bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-accent transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground hover:bg-accent transition-colors"
+            title="Logout"
           >
             <LogOut className="h-3.5 w-3.5" />
-            Logout
           </button>
         ) : (
           <button
             onClick={() => navigate("/login")}
-            className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-transform active:scale-95"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform active:scale-95"
+            title="Login"
           >
             <LogIn className="h-3.5 w-3.5" />
-            Login
           </button>
         )}
       </DateNav>
@@ -98,6 +105,8 @@ const Index = () => {
         locations={locations}
         selectedId={selectedLocationId}
         onChange={setSelectedLocationId}
+        onReload={handleReload}
+        reloading={reloading}
       />
 
       <TimelineView
