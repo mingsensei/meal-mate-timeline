@@ -8,6 +8,8 @@ import { CalendarView } from "@/components/CalendarView";
 import { TimelineView, TimelineViewHandle } from "@/components/TimelineView";
 import { BookingModal } from "@/components/BookingModal";
 import { ReservationList } from "@/components/ReservationList";
+import { DeletedBookingsList } from "@/components/DeletedBookingsList";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useBookings } from "@/hooks/use-bookings";
 import { useLocations } from "@/hooks/use-locations";
 import { useAuth } from "@/hooks/use-auth";
@@ -25,8 +27,17 @@ const Index = () => {
   const timelineRef = useRef<TimelineViewHandle>(null);
 
   const { locations, tables, selectedLocationId, setSelectedLocationId } = useLocations();
-  const { loading, getBookingsForDate, getDatesWithBookings, addBooking, updateBooking, deleteBooking, refetch } =
-    useBookings();
+  const {
+    loading,
+    deletedBookings,
+    getBookingsForDate,
+    getDatesWithBookings,
+    addBooking,
+    updateBooking,
+    deleteBooking,
+    restoreBooking,
+    refetch,
+  } = useBookings();
 
   const dateStr = format(date, "yyyy-MM-dd");
   const allDayBookings = getBookingsForDate(dateStr);
@@ -121,12 +132,33 @@ const Index = () => {
 
       {/* Reservation list below timeline */}
       <div className="flex-1 min-h-0 border-t border-border overflow-y-auto bg-background">
-        <div className="sticky top-0 z-10 bg-card border-b border-border px-4 py-2">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            All Reservations ({allDayBookings.length})
-          </h2>
-        </div>
-        <ReservationList bookings={allDayBookings} onBookingClick={handleBookingClick} />
+        <Tabs defaultValue="active" className="w-full">
+          <div className="sticky top-0 z-10 bg-card border-b border-border px-4 py-2">
+            <TabsList className="h-9">
+              <TabsTrigger value="active" className="text-xs">
+                Active ({allDayBookings.length})
+              </TabsTrigger>
+              <TabsTrigger value="deleted" className="text-xs relative">
+                Deleted
+                {deletedBookings.length > 0 && (
+                  <span className="ml-1.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                    {deletedBookings.length}
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
+          </div>
+          <TabsContent value="active" className="mt-0">
+            <ReservationList bookings={allDayBookings} onBookingClick={handleBookingClick} />
+          </TabsContent>
+          <TabsContent value="deleted" className="mt-0">
+            <DeletedBookingsList
+              bookings={deletedBookings}
+              onRestore={restoreBooking}
+              canRestore={isLoggedIn}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {view === "calendar" && (
