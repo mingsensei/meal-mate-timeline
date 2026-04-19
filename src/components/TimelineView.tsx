@@ -201,19 +201,25 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
       blocks.forEach((block) => {
         const span = parseInt(block.getAttribute("data-span") || "1");
         block.style.height = `${span * EXPORT_ROW - 6}px`;
-        block.style.padding = "6px 8px";
+        block.style.padding = "8px 10px";
         block.style.boxSizing = "border-box";
         block.style.display = "block";
-        block.style.overflow = "hidden";
+        block.style.overflow = "visible";
         block.style.fontFamily = "system-ui, -apple-system, sans-serif";
         block.style.border = "none";
         block.style.textAlign = "left";
+        block.style.whiteSpace = "normal";
         // Reset to avoid inherited line-height collapsing descenders
         block.style.lineHeight = "normal";
 
         const innerRows = block.querySelectorAll<HTMLElement>(":scope > div");
         innerRows.forEach((row, index) => {
-          row.style.display = "block";
+          row.style.display = index === 0 ? "grid" : "block";
+          if (index === 0) {
+            row.style.gridTemplateColumns = "minmax(0, 1fr) auto";
+            row.style.columnGap = "6px";
+            row.style.alignItems = "center";
+          }
           // No fixed height + no overflow:hidden on the row itself
           // (parent block already clips). This keeps descenders (g, p, y) intact.
           row.style.overflow = "visible";
@@ -222,28 +228,31 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
           row.style.marginBottom = index < innerRows.length - 1 ? "3px" : "0";
           row.style.padding = "0";
           row.style.height = "auto";
+          row.style.minHeight = index === 0 ? "20px" : "16px";
 
           if (index === 0) {
             row.style.fontSize = "13px";
-            row.style.lineHeight = "1.5";
+            row.style.lineHeight = "18px";
             row.style.fontWeight = "600";
           } else {
             row.style.fontSize = "11px";
-            row.style.lineHeight = "1.5";
+            row.style.lineHeight = "15px";
             row.style.opacity = "0.9";
           }
 
           const spans = row.querySelectorAll<HTMLElement>("span");
 
           if (index === 0 && spans.length >= 2) {
-            spans[0].style.display = "inline";
+            spans[0].style.display = "block";
             spans[0].style.fontWeight = "600";
             spans[0].style.whiteSpace = "nowrap";
-            spans[0].style.marginRight = "6px";
-            spans[0].style.verticalAlign = "baseline";
-            spans[0].style.lineHeight = "1.5";
+            spans[0].style.lineHeight = "18px";
+            spans[0].style.overflow = "hidden";
+            spans[0].style.textOverflow = "ellipsis";
+            spans[0].style.minWidth = "0";
+            spans[0].style.paddingBottom = "2px";
 
-            spans[1].style.display = "inline";
+            spans[1].style.display = "block";
             spans[1].style.padding = "1px 5px";
             spans[1].style.borderRadius = "3px";
             spans[1].style.background = "#fef08a";
@@ -252,14 +261,16 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
             spans[1].style.fontStyle = "italic";
             spans[1].style.fontWeight = "500";
             spans[1].style.whiteSpace = "nowrap";
-            spans[1].style.verticalAlign = "baseline";
-            spans[1].style.lineHeight = "1.5";
+            spans[1].style.lineHeight = "16px";
+            spans[1].style.alignSelf = "center";
           } else {
             spans.forEach((s) => {
               s.style.display = "inline";
               s.style.whiteSpace = "nowrap";
-              s.style.lineHeight = "1.5";
+              s.style.lineHeight = index === 0 ? "18px" : "15px";
               s.style.verticalAlign = "baseline";
+              s.style.overflow = "visible";
+              s.style.textOverflow = "clip";
             });
           }
         });
