@@ -187,19 +187,20 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
       clone.style.background = "#ffffff";
 
       const EXPORT_WIDTH = 1920;
-      const EXPORT_HEIGHT = 1080;
-      const EXPORT_PADDING_X = 32;
-      const EXPORT_PADDING_Y = 32;
+      const EXPORT_HEIGHT = 1920;
+      const EXPORT_PADDING_X = 40;
+      const EXPORT_PADDING_Y = 40;
+      const EXPORT_HEADER_HEIGHT = 56;
       const tableCountForExport = Math.max(tables.length, 1);
       const availableWidth = EXPORT_WIDTH - EXPORT_PADDING_X * 2;
       const availableHeight = EXPORT_HEIGHT - EXPORT_PADDING_Y * 2;
 
-      // Stretch the timeline so it fills the full 16:9 frame both horizontally and vertically.
-      const EXPORT_TABLE_COL = Math.max(64, Math.round(availableWidth * 0.05));
+      // Stretch the timeline so it fills the full 1:1 square frame both horizontally and vertically.
+      const EXPORT_TABLE_COL = Math.max(96, Math.round(availableWidth * 0.06));
       const EXPORT_SLOT_W = (availableWidth - EXPORT_TABLE_COL) / TIME_SLOTS.length;
-      const EXPORT_ROW = Math.max(56, Math.floor((availableHeight - HEADER_HEIGHT) / tableCountForExport));
+      const EXPORT_ROW = Math.max(72, Math.floor((availableHeight - EXPORT_HEADER_HEIGHT) / tableCountForExport));
       const contentWidth = EXPORT_TABLE_COL + EXPORT_SLOT_W * TIME_SLOTS.length;
-      const contentHeight = HEADER_HEIGHT + tableCountForExport * EXPORT_ROW;
+      const contentHeight = EXPORT_HEADER_HEIGHT + tableCountForExport * EXPORT_ROW;
 
       clone.style.width = `${contentWidth}px`;
 
