@@ -264,13 +264,13 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
         block.style.left = `${slotsFromOrigin * EXPORT_SLOT_W}px`;
         block.style.width = `${Math.max(slotsWide * EXPORT_SLOT_W, EXPORT_SLOT_W)}px`;
 
-        block.style.height = `${Math.max(span * EXPORT_ROW - 8, hasNote ? 88 : 66)}px`;
-        block.style.padding = hasNote ? "9px 10px 10px" : "10px";
+        block.style.height = `${Math.max(span * EXPORT_ROW - 8, hasNote ? 110 : 80)}px`;
+        block.style.padding = hasNote ? "12px 14px 14px" : "14px";
         block.style.boxSizing = "border-box";
         block.style.display = "flex";
         block.style.flexDirection = "column";
         block.style.justifyContent = "flex-start";
-        block.style.gap = "4px";
+        block.style.gap = "6px";
         block.style.overflow = "hidden";
         block.style.fontFamily = "system-ui, -apple-system, sans-serif";
         block.style.border = "none";
@@ -283,7 +283,7 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
           if (index === 0) {
             row.style.flexDirection = "column";
             row.style.alignItems = "flex-start";
-            row.style.gap = "4px";
+            row.style.gap = "6px";
           }
           row.style.overflow = "visible";
           row.style.whiteSpace = "normal";
@@ -298,8 +298,8 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
             row.style.lineHeight = "normal";
             row.style.fontWeight = "inherit";
           } else {
-            row.style.fontSize = "11px";
-            row.style.lineHeight = "17px";
+            row.style.fontSize = "16px";
+            row.style.lineHeight = "22px";
             row.style.opacity = "0.92";
           }
 
@@ -308,10 +308,10 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
           if (index === 0 && spans.length >= 1) {
             spans[0].style.display = "block";
             spans[0].style.width = "100%";
-            spans[0].style.fontSize = "13px";
-            spans[0].style.fontWeight = "600";
+            spans[0].style.fontSize = "20px";
+            spans[0].style.fontWeight = "700";
             spans[0].style.whiteSpace = "nowrap";
-            spans[0].style.lineHeight = "22px";
+            spans[0].style.lineHeight = "28px";
             spans[0].style.overflow = "hidden";
             spans[0].style.textOverflow = "ellipsis";
             spans[0].style.minWidth = "0";
@@ -321,15 +321,15 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
               spans[1].style.display = "inline-flex";
               spans[1].style.alignItems = "center";
               spans[1].style.maxWidth = "100%";
-              spans[1].style.padding = "2px 6px 3px";
-              spans[1].style.borderRadius = "4px";
+              spans[1].style.padding = "3px 8px 4px";
+              spans[1].style.borderRadius = "5px";
               spans[1].style.background = "#fef08a";
               spans[1].style.color = "#713f12";
-              spans[1].style.fontSize = "10px";
+              spans[1].style.fontSize = "14px";
               spans[1].style.fontStyle = "italic";
-              spans[1].style.fontWeight = "500";
+              spans[1].style.fontWeight = "600";
               spans[1].style.whiteSpace = "nowrap";
-              spans[1].style.lineHeight = "16px";
+              spans[1].style.lineHeight = "20px";
               spans[1].style.overflow = "hidden";
               spans[1].style.textOverflow = "ellipsis";
             }
@@ -337,10 +337,12 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
             spans.forEach((s) => {
               s.style.display = "block";
               s.style.whiteSpace = "nowrap";
-              s.style.lineHeight = "17px";
+              s.style.lineHeight = "22px";
               s.style.padding = "0 0 2px";
               s.style.overflow = "hidden";
               s.style.textOverflow = "ellipsis";
+              s.style.fontSize = "16px";
+              s.style.fontWeight = "500";
             });
           }
         });
