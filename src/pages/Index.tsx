@@ -16,7 +16,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Booking } from "@/lib/booking-data";
 
 const Index = () => {
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, isSuperAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const [date, setDate] = useState(new Date());
   const [view, setView] = useState<"calendar" | "timeline">("timeline");
@@ -36,6 +36,8 @@ const Index = () => {
     updateBooking,
     deleteBooking,
     restoreBooking,
+    permanentDeleteBooking,
+    toggleSeal,
     refetch,
   } = useBookings();
 
