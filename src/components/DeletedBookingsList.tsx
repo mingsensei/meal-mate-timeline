@@ -44,17 +44,35 @@ export function DeletedBookingsList({ bookings, onRestore, onPermanentDelete, ca
             <span className="font-semibold text-sm text-foreground truncate line-through opacity-80">
               {b.customer_name}
             </span>
-            {canRestore && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 px-2 text-xs"
-                onClick={() => onRestore(b.id)}
-              >
-                <RotateCcw className="h-3 w-3 mr-1" />
-                Restore
-              </Button>
-            )}
+            <div className="flex items-center gap-1.5">
+              {canRestore && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => onRestore(b.id)}
+                >
+                  <RotateCcw className="h-3 w-3 mr-1" />
+                  Restore
+                </Button>
+              )}
+              {canPermanentDelete && onPermanentDelete && (
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => {
+                    if (confirm(`Xoá vĩnh viễn booking của "${b.customer_name}"? Hành động này không thể hoàn tác.`)) {
+                      onPermanentDelete(b.id);
+                    }
+                  }}
+                  title="Permanently delete (super admin only)"
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Forever
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
