@@ -190,6 +190,7 @@ const Index = () => {
           onClose={() => setModalOpen(false)}
           onSave={handleSave}
           onDelete={deleteBooking}
+          onToggleSeal={(id, seal) => toggleSeal(id, seal, null)}
           booking={editingBooking}
           date={dateStr}
           tables={tables}
