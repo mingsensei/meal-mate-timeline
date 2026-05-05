@@ -186,7 +186,7 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
       clone.style.overflow = "visible";
       clone.style.background = "#ffffff";
 
-      const EXPORT_WIDTH = 1920;
+      const EXPORT_WIDTH = 1440;
       const EXPORT_HEIGHT = 1920;
       const EXPORT_PADDING_X = 40;
       const EXPORT_PADDING_Y = 40;
