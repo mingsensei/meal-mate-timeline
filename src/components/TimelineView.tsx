@@ -177,185 +177,29 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
     setExporting(true);
     try {
       const el = timelineRef.current;
+
+      // Scale factor – render at the native on-screen size of the timeline,
+      // matching exactly what the user sees in the web view.
+      const SCALE = 3;
+
+      const contentWidth = TABLE_COL_WIDTH + totalWidth;
+      const contentHeight = el.scrollHeight;
+
       const clone = el.cloneNode(true) as HTMLElement;
-      clone.style.position = "absolute";
-      clone.style.left = "-9999px";
+      clone.style.position = "relative";
+      clone.style.left = "0";
       clone.style.top = "0";
-      clone.style.width = `${TABLE_COL_WIDTH + totalWidth}px`;
-      clone.style.height = "auto";
+      clone.style.width = `${contentWidth}px`;
+      clone.style.height = `${contentHeight}px`;
       clone.style.overflow = "visible";
       clone.style.background = "#ffffff";
+      clone.style.transform = "none";
 
-      const EXPORT_WIDTH = 1440;
-      const EXPORT_PADDING_X = 40;
-      const EXPORT_PADDING_Y = 40;
-      const EXPORT_HEADER_HEIGHT = 88;
-      const tableCountForExport = Math.max(tables.length, 1);
-      const MIN_EXPORT_ROW = 240;
-      const EXPORT_HEIGHT = Math.max(
-        1920,
-        EXPORT_PADDING_Y * 2 + EXPORT_HEADER_HEIGHT + tableCountForExport * MIN_EXPORT_ROW
-      );
-      const availableWidth = EXPORT_WIDTH - EXPORT_PADDING_X * 2;
-      const availableHeight = EXPORT_HEIGHT - EXPORT_PADDING_Y * 2;
+      // Remove the now-line indicator so the export is clean.
+      clone.querySelectorAll<HTMLElement>("[data-now-line]").forEach((n) => n.remove());
 
-      // Stretch the timeline vertically so export text has enough room and blocks keep clear gaps.
-      const EXPORT_TABLE_COL = Math.max(140, Math.round(availableWidth * 0.08));
-      const EXPORT_SLOT_W = (availableWidth - EXPORT_TABLE_COL) / TIME_SLOTS.length;
-      const EXPORT_ROW = Math.max(MIN_EXPORT_ROW, Math.floor((availableHeight - EXPORT_HEADER_HEIGHT) / tableCountForExport));
-      const contentWidth = EXPORT_TABLE_COL + EXPORT_SLOT_W * TIME_SLOTS.length;
-      const contentHeight = EXPORT_HEADER_HEIGHT + tableCountForExport * EXPORT_ROW;
-
-      clone.style.width = `${contentWidth}px`;
-
-      // Resize time-header slot cells
-      const headerSlotCells = clone.querySelectorAll<HTMLElement>("[data-header-slot]");
-      headerSlotCells.forEach((cell) => {
-        cell.style.width = `${EXPORT_SLOT_W}px`;
-        cell.style.height = `${EXPORT_HEADER_HEIGHT}px`;
-        const label = cell.querySelector<HTMLElement>("span");
-        if (label) {
-          label.style.fontSize = "40px";
-          label.style.fontWeight = "700";
-        }
-      });
-
-      // Resize the header row container itself
-      const headerRow = clone.querySelector<HTMLElement>(".sticky.top-0");
-      if (headerRow) {
-        headerRow.style.height = `${EXPORT_HEADER_HEIGHT}px`;
-      }
-
-      // Resize table-name (left sticky) cells
-      const tableNameCells = clone.querySelectorAll<HTMLElement>("[data-table-cell]");
-      tableNameCells.forEach((cell) => {
-        cell.style.width = `${EXPORT_TABLE_COL}px`;
-        const spans = cell.querySelectorAll<HTMLElement>("span");
-        if (spans[0]) {
-          spans[0].style.fontSize = "44px";
-          spans[0].style.fontWeight = "700";
-        }
-        if (spans[1]) {
-          spans[1].style.fontSize = "32px";
-          spans[1].style.marginTop = "4px";
-        }
-      });
-
-      const nowLines = clone.querySelectorAll<HTMLElement>("[data-now-line]");
-      nowLines.forEach((line) => line.remove());
-
-      const rows = clone.querySelectorAll<HTMLElement>("[data-row]");
-      rows.forEach((row) => { row.style.height = `${EXPORT_ROW}px`; });
-
-      const gridCells = clone.querySelectorAll<HTMLElement>("[data-grid-cell]");
-      gridCells.forEach((cell) => {
-        cell.style.height = `${EXPORT_ROW}px`;
-        cell.style.width = `${EXPORT_SLOT_W}px`;
-      });
-
-      const blocks = clone.querySelectorAll<HTMLElement>("[data-block]");
-      blocks.forEach((block) => {
-        const span = parseInt(block.getAttribute("data-span") || "1");
-        const innerRows = Array.from(block.querySelectorAll<HTMLElement>(":scope > div"));
-        const headerSpans = innerRows[0]?.querySelectorAll<HTMLElement>("span") ?? [];
-        const hasNote = headerSpans.length > 1;
-
-        // Re-anchor block left/width to the new slot width so blocks line up with the grid.
-        const originalLeft = parseFloat(block.style.left || "0");
-        const originalWidth = parseFloat(block.style.width || "0");
-        const slotsFromOrigin = originalLeft / SLOT_W;
-        const slotsWide = originalWidth / SLOT_W;
-        const H_MARGIN = 8;
-        const V_MARGIN = 18;
-        block.style.left = `${slotsFromOrigin * EXPORT_SLOT_W + H_MARGIN}px`;
-        block.style.width = `${Math.max(slotsWide * EXPORT_SLOT_W - H_MARGIN * 2, EXPORT_SLOT_W - H_MARGIN * 2)}px`;
-        block.style.top = `${V_MARGIN}px`;
-        block.style.height = `${Math.max(span * EXPORT_ROW - V_MARGIN * 2, hasNote ? 190 : 150)}px`;
-        block.style.padding = hasNote ? "14px 18px 16px" : "16px 18px";
-        block.style.boxSizing = "border-box";
-        block.style.display = "flex";
-        block.style.flexDirection = "column";
-        block.style.justifyContent = "flex-start";
-        block.style.gap = "4px";
-        block.style.overflow = "hidden";
-        block.style.fontFamily = "system-ui, -apple-system, sans-serif";
-        block.style.border = "none";
-        block.style.textAlign = "left";
-        block.style.whiteSpace = "normal";
-        block.style.lineHeight = "normal";
-
-        innerRows.forEach((row, index) => {
-          row.style.display = index === 0 ? "flex" : "block";
-          if (index === 0) {
-            row.style.flexDirection = "column";
-            row.style.alignItems = "flex-start";
-            row.style.gap = "6px";
-          }
-          row.style.overflow = "visible";
-          row.style.whiteSpace = "normal";
-          row.style.width = "100%";
-          row.style.marginBottom = "0";
-          row.style.padding = "0";
-          row.style.height = "auto";
-          row.style.minHeight = "0";
-
-          if (index === 0) {
-            row.style.fontSize = "inherit";
-            row.style.lineHeight = "normal";
-            row.style.fontWeight = "inherit";
-          } else {
-            row.style.fontSize = "28px";
-            row.style.lineHeight = "34px";
-            row.style.opacity = "0.92";
-          }
-
-          const spans = row.querySelectorAll<HTMLElement>("span");
-
-          if (index === 0 && spans.length >= 1) {
-            spans[0].style.display = "block";
-            spans[0].style.width = "100%";
-            spans[0].style.fontSize = "32px";
-            spans[0].style.fontWeight = "700";
-            spans[0].style.whiteSpace = "nowrap";
-            spans[0].style.lineHeight = "40px";
-            spans[0].style.overflow = "hidden";
-            spans[0].style.textOverflow = "ellipsis";
-            spans[0].style.minWidth = "0";
-            spans[0].style.padding = "0 0 2px";
-
-            if (spans[1]) {
-              spans[1].style.display = "inline-flex";
-              spans[1].style.alignItems = "center";
-              spans[1].style.maxWidth = "100%";
-              spans[1].style.padding = "3px 10px 4px";
-              spans[1].style.borderRadius = "8px";
-              spans[1].style.background = "#fef08a";
-              spans[1].style.color = "#713f12";
-              spans[1].style.fontSize = "24px";
-              spans[1].style.fontStyle = "italic";
-              spans[1].style.fontWeight = "600";
-              spans[1].style.whiteSpace = "nowrap";
-              spans[1].style.lineHeight = "30px";
-              spans[1].style.overflow = "hidden";
-              spans[1].style.textOverflow = "ellipsis";
-            }
-          } else {
-            spans.forEach((s) => {
-              s.style.display = "block";
-              s.style.whiteSpace = "nowrap";
-              s.style.lineHeight = "34px";
-              s.style.padding = "0";
-              s.style.overflow = "hidden";
-              s.style.textOverflow = "ellipsis";
-              s.style.fontSize = "28px";
-              s.style.fontWeight = "500";
-            });
-          }
-        });
-      });
-
-      const stickyEls = clone.querySelectorAll<HTMLElement>(".sticky");
-      stickyEls.forEach((s) => {
+      // Sticky elements behave oddly when cloned offscreen – reset them.
+      clone.querySelectorAll<HTMLElement>(".sticky").forEach((s) => {
         s.style.position = "relative";
         s.style.left = "0";
         s.style.top = "0";
@@ -365,35 +209,23 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
       exportFrame.style.position = "absolute";
       exportFrame.style.left = "-9999px";
       exportFrame.style.top = "0";
-      exportFrame.style.width = `${EXPORT_WIDTH}px`;
-      exportFrame.style.height = `${EXPORT_HEIGHT}px`;
-      exportFrame.style.padding = `${EXPORT_PADDING_Y}px ${EXPORT_PADDING_X}px`;
-      exportFrame.style.boxSizing = "border-box";
-      exportFrame.style.display = "flex";
-      exportFrame.style.alignItems = "stretch";
-      exportFrame.style.justifyContent = "stretch";
+      exportFrame.style.width = `${contentWidth}px`;
+      exportFrame.style.height = `${contentHeight}px`;
       exportFrame.style.background = "#ffffff";
       exportFrame.style.overflow = "hidden";
-
-      clone.style.position = "relative";
-      clone.style.left = "0";
-      clone.style.top = "0";
-      clone.style.width = `${contentWidth}px`;
-      clone.style.height = `${contentHeight}px`;
-      clone.style.transform = "none";
-
       exportFrame.appendChild(clone);
       document.body.appendChild(exportFrame);
-      await new Promise((r) => setTimeout(r, 200));
+
+      await new Promise((r) => setTimeout(r, 100));
 
       const canvas = await html2canvas(exportFrame, {
-        scale: 2,
+        scale: SCALE,
         backgroundColor: "#ffffff",
         useCORS: true,
-        width: EXPORT_WIDTH,
-        height: EXPORT_HEIGHT,
-        windowWidth: EXPORT_WIDTH,
-        windowHeight: EXPORT_HEIGHT,
+        width: contentWidth,
+        height: contentHeight,
+        windowWidth: contentWidth,
+        windowHeight: contentHeight,
       });
 
       document.body.removeChild(exportFrame);
