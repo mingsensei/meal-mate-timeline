@@ -178,22 +178,20 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
     try {
       const el = timelineRef.current;
 
-      // Portrait phone frame (iPhone-ish 9:19.5).
-      const FRAME_W = 1170;
-      const FRAME_H = 2532;
-      const PADDING = 32;
-
       const contentWidth = TABLE_COL_WIDTH + totalWidth;
-      const contentHeight = el.scrollHeight;
+      const naturalHeight = el.scrollHeight;
+
+      // Stretch each row 3× vertically while keeping horizontal layout intact.
+      const V_SCALE = 3;
 
       const clone = el.cloneNode(true) as HTMLElement;
-      clone.style.position = "absolute";
+      clone.style.position = "relative";
       clone.style.left = "0";
       clone.style.top = "0";
       clone.style.width = `${contentWidth}px`;
-      clone.style.height = `${contentHeight}px`;
       clone.style.overflow = "visible";
       clone.style.background = "#ffffff";
+      clone.style.transform = "none";
 
       clone.querySelectorAll<HTMLElement>("[data-now-line]").forEach((n) => n.remove());
       clone.querySelectorAll<HTMLElement>(".sticky").forEach((s) => {
@@ -202,30 +200,35 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
         s.style.top = "0";
       });
 
-      // Rotate -90° so the wide timeline fits a tall portrait page.
-      // After rotation, original width becomes vertical, height becomes horizontal.
-      const availableW = FRAME_W - PADDING * 2;
-      const availableH = FRAME_H - PADDING * 2;
-      const scale = Math.min(availableW / contentHeight, availableH / contentWidth);
+      // Multiply every row's height by V_SCALE.
+      clone.querySelectorAll<HTMLElement>("[data-row]").forEach((row) => {
+        const h = row.getBoundingClientRect().height;
+        row.style.height = `${h * V_SCALE}px`;
+      });
+      clone.querySelectorAll<HTMLElement>("[data-grid-cell]").forEach((cell) => {
+        const h = cell.getBoundingClientRect().height;
+        cell.style.height = `${h * V_SCALE}px`;
+      });
+      // Booking blocks – scale top + height too.
+      clone.querySelectorAll<HTMLElement>("[data-block]").forEach((block) => {
+        const top = parseFloat(block.style.top || "0");
+        const height = block.getBoundingClientRect().height;
+        block.style.top = `${top * V_SCALE}px`;
+        block.style.height = `${height * V_SCALE}px`;
+      });
 
-      const rotatedW = contentHeight * scale; // horizontal extent after rotate
-      const rotatedH = contentWidth * scale;  // vertical extent after rotate
-      const offsetX = PADDING + (availableW - rotatedW) / 2;
-      const offsetY = PADDING + (availableH - rotatedH) / 2;
+      const contentHeight = HEADER_HEIGHT + Array.from(
+        clone.querySelectorAll<HTMLElement>("[data-row]")
+      ).reduce((sum, r) => sum + parseFloat(r.style.height || "0"), 0);
 
-      // Place clone with transform-origin top-left, rotate -90, then translate.
-      // After rotate(-90deg) around top-left: point (x,y) -> (y, -x).
-      // We want the rotated box to occupy [offsetX..offsetX+rotatedW] x [offsetY..offsetY+rotatedH].
-      // Apply: translate(offsetX, offsetY + rotatedH) then rotate(-90) then scale(scale).
-      clone.style.transformOrigin = "top left";
-      clone.style.transform = `translate(${offsetX}px, ${offsetY + rotatedH}px) rotate(-90deg) scale(${scale})`;
+      clone.style.height = `${contentHeight}px`;
 
       const exportFrame = document.createElement("div");
       exportFrame.style.position = "absolute";
       exportFrame.style.left = "-9999px";
       exportFrame.style.top = "0";
-      exportFrame.style.width = `${FRAME_W}px`;
-      exportFrame.style.height = `${FRAME_H}px`;
+      exportFrame.style.width = `${contentWidth}px`;
+      exportFrame.style.height = `${contentHeight}px`;
       exportFrame.style.background = "#ffffff";
       exportFrame.style.overflow = "hidden";
       exportFrame.appendChild(clone);
@@ -237,10 +240,10 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
         scale: 2,
         backgroundColor: "#ffffff",
         useCORS: true,
-        width: FRAME_W,
-        height: FRAME_H,
-        windowWidth: FRAME_W,
-        windowHeight: FRAME_H,
+        width: contentWidth,
+        height: contentHeight,
+        windowWidth: contentWidth,
+        windowHeight: contentHeight,
       });
 
       document.body.removeChild(exportFrame);
