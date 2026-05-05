@@ -187,18 +187,22 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
       clone.style.background = "#ffffff";
 
       const EXPORT_WIDTH = 1440;
-      const EXPORT_HEIGHT = 1920;
       const EXPORT_PADDING_X = 40;
       const EXPORT_PADDING_Y = 40;
       const EXPORT_HEADER_HEIGHT = 88;
       const tableCountForExport = Math.max(tables.length, 1);
+      const MIN_EXPORT_ROW = 240;
+      const EXPORT_HEIGHT = Math.max(
+        1920,
+        EXPORT_PADDING_Y * 2 + EXPORT_HEADER_HEIGHT + tableCountForExport * MIN_EXPORT_ROW
+      );
       const availableWidth = EXPORT_WIDTH - EXPORT_PADDING_X * 2;
       const availableHeight = EXPORT_HEIGHT - EXPORT_PADDING_Y * 2;
 
-      // Stretch the timeline so it fills the full 1:1 square frame both horizontally and vertically.
+      // Stretch the timeline vertically so export text has enough room and blocks keep clear gaps.
       const EXPORT_TABLE_COL = Math.max(140, Math.round(availableWidth * 0.08));
       const EXPORT_SLOT_W = (availableWidth - EXPORT_TABLE_COL) / TIME_SLOTS.length;
-      const EXPORT_ROW = Math.max(120, Math.floor((availableHeight - EXPORT_HEADER_HEIGHT) / tableCountForExport));
+      const EXPORT_ROW = Math.max(MIN_EXPORT_ROW, Math.floor((availableHeight - EXPORT_HEADER_HEIGHT) / tableCountForExport));
       const contentWidth = EXPORT_TABLE_COL + EXPORT_SLOT_W * TIME_SLOTS.length;
       const contentHeight = EXPORT_HEADER_HEIGHT + tableCountForExport * EXPORT_ROW;
 
@@ -261,18 +265,18 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
         const originalWidth = parseFloat(block.style.width || "0");
         const slotsFromOrigin = originalLeft / SLOT_W;
         const slotsWide = originalWidth / SLOT_W;
-        const H_MARGIN = 6;
-        const V_MARGIN = 8;
+        const H_MARGIN = 8;
+        const V_MARGIN = 18;
         block.style.left = `${slotsFromOrigin * EXPORT_SLOT_W + H_MARGIN}px`;
         block.style.width = `${Math.max(slotsWide * EXPORT_SLOT_W - H_MARGIN * 2, EXPORT_SLOT_W - H_MARGIN * 2)}px`;
         block.style.top = `${V_MARGIN}px`;
-        block.style.height = `${Math.max(span * EXPORT_ROW - V_MARGIN * 2, hasNote ? 180 : 130)}px`;
-        block.style.padding = hasNote ? "16px 18px 18px" : "18px";
+        block.style.height = `${Math.max(span * EXPORT_ROW - V_MARGIN * 2, hasNote ? 190 : 150)}px`;
+        block.style.padding = hasNote ? "14px 18px 16px" : "16px 18px";
         block.style.boxSizing = "border-box";
         block.style.display = "flex";
         block.style.flexDirection = "column";
         block.style.justifyContent = "flex-start";
-        block.style.gap = "6px";
+        block.style.gap = "4px";
         block.style.overflow = "hidden";
         block.style.fontFamily = "system-ui, -apple-system, sans-serif";
         block.style.border = "none";
@@ -285,7 +289,7 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
           if (index === 0) {
             row.style.flexDirection = "column";
             row.style.alignItems = "flex-start";
-            row.style.gap = "10px";
+            row.style.gap = "6px";
           }
           row.style.overflow = "visible";
           row.style.whiteSpace = "normal";
@@ -300,8 +304,8 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
             row.style.lineHeight = "normal";
             row.style.fontWeight = "inherit";
           } else {
-            row.style.fontSize = "32px";
-            row.style.lineHeight = "40px";
+            row.style.fontSize = "28px";
+            row.style.lineHeight = "34px";
             row.style.opacity = "0.92";
           }
 
@@ -310,28 +314,28 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
           if (index === 0 && spans.length >= 1) {
             spans[0].style.display = "block";
             spans[0].style.width = "100%";
-            spans[0].style.fontSize = "40px";
+            spans[0].style.fontSize = "32px";
             spans[0].style.fontWeight = "700";
             spans[0].style.whiteSpace = "nowrap";
-            spans[0].style.lineHeight = "52px";
+            spans[0].style.lineHeight = "40px";
             spans[0].style.overflow = "hidden";
             spans[0].style.textOverflow = "ellipsis";
             spans[0].style.minWidth = "0";
-            spans[0].style.padding = "0 0 6px";
+            spans[0].style.padding = "0 0 2px";
 
             if (spans[1]) {
               spans[1].style.display = "inline-flex";
               spans[1].style.alignItems = "center";
               spans[1].style.maxWidth = "100%";
-              spans[1].style.padding = "5px 12px 6px";
+              spans[1].style.padding = "3px 10px 4px";
               spans[1].style.borderRadius = "8px";
               spans[1].style.background = "#fef08a";
               spans[1].style.color = "#713f12";
-              spans[1].style.fontSize = "28px";
+              spans[1].style.fontSize = "24px";
               spans[1].style.fontStyle = "italic";
               spans[1].style.fontWeight = "600";
               spans[1].style.whiteSpace = "nowrap";
-              spans[1].style.lineHeight = "36px";
+              spans[1].style.lineHeight = "30px";
               spans[1].style.overflow = "hidden";
               spans[1].style.textOverflow = "ellipsis";
             }
@@ -339,11 +343,11 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
             spans.forEach((s) => {
               s.style.display = "block";
               s.style.whiteSpace = "nowrap";
-              s.style.lineHeight = "40px";
-              s.style.padding = "0 0 4px";
+              s.style.lineHeight = "34px";
+              s.style.padding = "0";
               s.style.overflow = "hidden";
               s.style.textOverflow = "ellipsis";
-              s.style.fontSize = "32px";
+              s.style.fontSize = "28px";
               s.style.fontWeight = "500";
             });
           }
