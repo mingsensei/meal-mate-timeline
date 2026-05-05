@@ -178,39 +178,54 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
     try {
       const el = timelineRef.current;
 
-      // Scale factor – render at the native on-screen size of the timeline,
-      // matching exactly what the user sees in the web view.
-      const SCALE = 3;
+      // Portrait phone frame (iPhone-ish 9:19.5).
+      const FRAME_W = 1170;
+      const FRAME_H = 2532;
+      const PADDING = 32;
 
       const contentWidth = TABLE_COL_WIDTH + totalWidth;
       const contentHeight = el.scrollHeight;
 
       const clone = el.cloneNode(true) as HTMLElement;
-      clone.style.position = "relative";
+      clone.style.position = "absolute";
       clone.style.left = "0";
       clone.style.top = "0";
       clone.style.width = `${contentWidth}px`;
       clone.style.height = `${contentHeight}px`;
       clone.style.overflow = "visible";
       clone.style.background = "#ffffff";
-      clone.style.transform = "none";
 
-      // Remove the now-line indicator so the export is clean.
       clone.querySelectorAll<HTMLElement>("[data-now-line]").forEach((n) => n.remove());
-
-      // Sticky elements behave oddly when cloned offscreen – reset them.
       clone.querySelectorAll<HTMLElement>(".sticky").forEach((s) => {
         s.style.position = "relative";
         s.style.left = "0";
         s.style.top = "0";
       });
 
+      // Rotate -90° so the wide timeline fits a tall portrait page.
+      // After rotation, original width becomes vertical, height becomes horizontal.
+      const availableW = FRAME_W - PADDING * 2;
+      const availableH = FRAME_H - PADDING * 2;
+      const scale = Math.min(availableW / contentHeight, availableH / contentWidth);
+
+      const rotatedW = contentHeight * scale; // horizontal extent after rotate
+      const rotatedH = contentWidth * scale;  // vertical extent after rotate
+      const offsetX = PADDING + (availableW - rotatedW) / 2;
+      const offsetY = PADDING + (availableH - rotatedH) / 2;
+
+      // Place clone with transform-origin top-left, rotate -90, then translate.
+      // After rotate(-90deg) around top-left: point (x,y) -> (y, -x).
+      // We want the rotated box to occupy [offsetX..offsetX+rotatedW] x [offsetY..offsetY+rotatedH].
+      // Apply: translate(offsetX, offsetY + rotatedH) then rotate(-90) then scale(scale).
+      clone.style.transformOrigin = "top left";
+      clone.style.transform = `translate(${offsetX}px, ${offsetY + rotatedH}px) rotate(-90deg) scale(${scale})`;
+
       const exportFrame = document.createElement("div");
       exportFrame.style.position = "absolute";
       exportFrame.style.left = "-9999px";
       exportFrame.style.top = "0";
-      exportFrame.style.width = `${contentWidth}px`;
-      exportFrame.style.height = `${contentHeight}px`;
+      exportFrame.style.width = `${FRAME_W}px`;
+      exportFrame.style.height = `${FRAME_H}px`;
       exportFrame.style.background = "#ffffff";
       exportFrame.style.overflow = "hidden";
       exportFrame.appendChild(clone);
@@ -219,13 +234,13 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
       await new Promise((r) => setTimeout(r, 100));
 
       const canvas = await html2canvas(exportFrame, {
-        scale: SCALE,
+        scale: 2,
         backgroundColor: "#ffffff",
         useCORS: true,
-        width: contentWidth,
-        height: contentHeight,
-        windowWidth: contentWidth,
-        windowHeight: contentHeight,
+        width: FRAME_W,
+        height: FRAME_H,
+        windowWidth: FRAME_W,
+        windowHeight: FRAME_H,
       });
 
       document.body.removeChild(exportFrame);
