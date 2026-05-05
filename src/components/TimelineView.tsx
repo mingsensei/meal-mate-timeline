@@ -261,10 +261,12 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
         const originalWidth = parseFloat(block.style.width || "0");
         const slotsFromOrigin = originalLeft / SLOT_W;
         const slotsWide = originalWidth / SLOT_W;
-        block.style.left = `${slotsFromOrigin * EXPORT_SLOT_W}px`;
-        block.style.width = `${Math.max(slotsWide * EXPORT_SLOT_W, EXPORT_SLOT_W)}px`;
-
-        block.style.height = `${Math.max(span * EXPORT_ROW - 8, hasNote ? 180 : 130)}px`;
+        const H_MARGIN = 6;
+        const V_MARGIN = 8;
+        block.style.left = `${slotsFromOrigin * EXPORT_SLOT_W + H_MARGIN}px`;
+        block.style.width = `${Math.max(slotsWide * EXPORT_SLOT_W - H_MARGIN * 2, EXPORT_SLOT_W - H_MARGIN * 2)}px`;
+        block.style.top = `${V_MARGIN}px`;
+        block.style.height = `${Math.max(span * EXPORT_ROW - V_MARGIN * 2, hasNote ? 180 : 130)}px`;
         block.style.padding = hasNote ? "16px 18px 18px" : "18px";
         block.style.boxSizing = "border-box";
         block.style.display = "flex";
