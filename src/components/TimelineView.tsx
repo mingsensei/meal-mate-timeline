@@ -212,6 +212,14 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
         const span = parseInt(block.getAttribute("data-span") || "1", 10);
         block.style.height = `${rowH * span - 4}px`;
         block.style.top = `2px`;
+        block.style.overflow = "visible";
+        // Ensure text isn't clipped by html2canvas line-height rounding.
+        block.querySelectorAll<HTMLElement>("*").forEach((child) => {
+          child.style.overflow = "visible";
+          child.style.lineHeight = "1.4";
+          child.style.textOverflow = "clip";
+          child.style.whiteSpace = "nowrap";
+        });
       });
 
       const contentHeight = HEADER_HEIGHT + rowH * tables.length;
