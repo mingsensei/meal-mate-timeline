@@ -177,12 +177,11 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
     setExporting(true);
     try {
       const el = timelineRef.current;
-
       const contentWidth = TABLE_COL_WIDTH + totalWidth;
-      const naturalHeight = el.scrollHeight;
 
-      // Stretch each row 3× vertically while keeping horizontal layout intact.
-      const V_SCALE = 3;
+      // Measure live row height (resolved from dvh).
+      const liveRow = el.querySelector<HTMLElement>("[data-row]");
+      const rowH = liveRow ? liveRow.getBoundingClientRect().height : 40;
 
       const clone = el.cloneNode(true) as HTMLElement;
       clone.style.position = "relative";
@@ -200,27 +199,22 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
         s.style.top = "0";
       });
 
-      // Multiply every row's height by V_SCALE.
+      // Lock row/cell heights to the resolved px value so html2canvas renders
+      // them identically to the on-screen view (dvh doesn't resolve off-screen).
       clone.querySelectorAll<HTMLElement>("[data-row]").forEach((row) => {
-        const h = row.getBoundingClientRect().height;
-        row.style.height = `${h * V_SCALE}px`;
+        row.style.height = `${rowH}px`;
       });
       clone.querySelectorAll<HTMLElement>("[data-grid-cell]").forEach((cell) => {
-        const h = cell.getBoundingClientRect().height;
-        cell.style.height = `${h * V_SCALE}px`;
+        cell.style.height = `${rowH}px`;
       });
-      // Booking blocks – scale top + height too.
+      // Booking blocks: recompute height from span count using the resolved row height.
       clone.querySelectorAll<HTMLElement>("[data-block]").forEach((block) => {
-        const top = parseFloat(block.style.top || "0");
-        const height = block.getBoundingClientRect().height;
-        block.style.top = `${top * V_SCALE}px`;
-        block.style.height = `${height * V_SCALE}px`;
+        const span = parseInt(block.getAttribute("data-span") || "1", 10);
+        block.style.height = `${rowH * span - 4}px`;
+        block.style.top = `2px`;
       });
 
-      const contentHeight = HEADER_HEIGHT + Array.from(
-        clone.querySelectorAll<HTMLElement>("[data-row]")
-      ).reduce((sum, r) => sum + parseFloat(r.style.height || "0"), 0);
-
+      const contentHeight = HEADER_HEIGHT + rowH * tables.length;
       clone.style.height = `${contentHeight}px`;
 
       const exportFrame = document.createElement("div");
