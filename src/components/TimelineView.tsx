@@ -238,8 +238,13 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
 
       await new Promise((r) => setTimeout(r, 100));
 
+      // Mobile canvas has stricter size limits (iOS Safari ~4096px, 16MP total).
+      // Downscale on small screens so html2canvas doesn't produce a blank / failed canvas.
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+      const scale = isMobile ? 1.5 : 2;
+
       const canvas = await html2canvas(exportFrame, {
-        scale: 2,
+        scale,
         backgroundColor: "#ffffff",
         useCORS: true,
         width: contentWidth,
@@ -250,10 +255,31 @@ export const TimelineView = forwardRef<TimelineViewHandle, TimelineViewProps>(fu
 
       document.body.removeChild(exportFrame);
 
-      const link = document.createElement("a");
-      link.download = `timeline-${format(date, "yyyy-MM-dd")}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+      const fileName = `timeline-${format(date, "yyyy-MM-dd")}.png`;
+
+      // iOS Safari ignores the <a download> attribute — the link opens the image
+      // inline instead of saving. Use toBlob + object URL and, on mobile, open in
+      // a new tab so the user can long-press to save / share.
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        if (isMobile) {
+          const win = window.open(url, "_blank");
+          if (!win) {
+            // Popup blocked — fall back to same-tab navigation.
+            window.location.href = url;
+          }
+        } else {
+          const link = document.createElement("a");
+          link.download = fileName;
+          link.href = url;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+        // Revoke after a delay so the new tab has time to load the blob.
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      }, "image/png");
     } catch (e) {
       console.error("Export failed", e);
     } finally {
