@@ -27,20 +27,27 @@ export function useBookings() {
 
   const fetchBookings = useCallback(async () => {
     setLoading(true);
-    // Active bookings (del_flg = false)
+    // Supabase Data API caps responses at 1000 rows by default. We now have
+    // >1000 rows in the bookings table, so newly-inserted rows can silently
+    // fall outside the default window. Order by date desc so the most recent
+    // rows are always included, and raise the cap with .range().
     const activeQuery = supabase
       .from("bookings")
       .select("*")
-      .eq("del_flg", false);
-    // Deleted bookings (del_flg = true) joined with history for IP / timestamp
+      .eq("del_flg", false)
+      .order("date", { ascending: false })
+      .range(0, 9999);
     const deletedQuery = supabase
       .from("bookings")
       .select("*")
-      .eq("del_flg", true);
+      .eq("del_flg", true)
+      .order("date", { ascending: false })
+      .range(0, 9999);
     const historyQuery = supabase
       .from("booking_delete_history")
       .select("*")
-      .order("deleted_at", { ascending: false });
+      .order("deleted_at", { ascending: false })
+      .range(0, 9999);
 
     const [activeRes, deletedRes, historyRes] = await Promise.all([
       activeQuery,
